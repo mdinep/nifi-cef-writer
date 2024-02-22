@@ -21,9 +21,7 @@ import org.apache.nifi.components.PropertyDescriptor;
 import org.apache.nifi.expression.AttributeExpression;
 import org.apache.nifi.expression.ExpressionLanguageScope;
 import org.apache.nifi.flowfile.FlowFile;
-import org.apache.nifi.annotation.lifecycle.OnScheduled;
 import org.apache.nifi.annotation.documentation.CapabilityDescription;
-import org.apache.nifi.annotation.documentation.SeeAlso;
 import org.apache.nifi.annotation.documentation.Tags;
 import org.apache.nifi.processor.AbstractProcessor;
 import org.apache.nifi.processor.ProcessContext;
@@ -50,7 +48,7 @@ public class CefWriter extends AbstractProcessor {
 
     //Restricted values for dropdown selection of whether complex header will be used
     public static final String DO_NOT_USE_COMPLEX_HEADER = "Do not use complex header";
-    public static final String USE_COMPLEX_HEADERE = "Use complex header";
+    public static final String USE_COMPLEX_HEADER = "Use complex header";
     public static final String USE_CONTENT_AS_MSG = "Use flowfile content";
     public static final String DO_NOT_USE_CONTENT_AS_MSG = "Do not use flowfile content";
 
@@ -63,7 +61,7 @@ public class CefWriter extends AbstractProcessor {
                     "If these properties are not set, flowfiles will fail to process. NOTE: not all downstream applications are configured to "+
                     "support complex headers in CEF records. Make sure your application can handle this before enabling this option.")
             .required(true)
-            .allowableValues(DO_NOT_USE_COMPLEX_HEADER, USE_COMPLEX_HEADERE)
+            .allowableValues(DO_NOT_USE_COMPLEX_HEADER, USE_COMPLEX_HEADER)
             .defaultValue(DO_NOT_USE_COMPLEX_HEADER)
             .build();
 
@@ -252,10 +250,10 @@ public class CefWriter extends AbstractProcessor {
         StringJoiner cefJ = new StringJoiner("|");
         StringJoiner fieldJ = new StringJoiner(" ");
         String cefPref = context.getProperty(SYSLOG_PREFIX).evaluateAttributeExpressions(flowFile).getValue();
-        String complexHeader = context.getProperty(COMPLEX_HEADER).evaluateAttributeExpressions(flowFile).getValue();
-        String contentMsg = context.getProperty(CONTENT_AS_MSG).evaluateAttributeExpressions(flowFile).getValue();
+        String complexHeader = context.getProperty(COMPLEX_HEADER).getValue();
+        String contentMsg = context.getProperty(CONTENT_AS_MSG).getValue();
 
-        if(complexHeader.equals(USE_COMPLEX_HEADERE)) {
+        if(complexHeader.equals(USE_COMPLEX_HEADER)) {
             String datetime = context.getProperty(EVENT_DATE).evaluateAttributeExpressions(flowFile).getValue();
             String eventHost = context.getProperty(EVENT_HOST).evaluateAttributeExpressions(flowFile).getValue();
 
