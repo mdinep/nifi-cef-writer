@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+      http://www.apache.org/licenses/LICENSE-2.0
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<head>
+    <meta charset="utf-8" />
+    <title>CefWriter</title>
+
+    <link rel="stylesheet" href="../../../../../css/component-usage.css" type="text/css" />
+</head>
+
+<body>
+<!-- Processor Documentation ================================================== -->
+<h2>Description:</h2>
+<p>
+    This processor replaces the contents of an incoming FlowFile with a CEF record for use by ArcSight and other such downstream SEIM applications.
+    There are two different options for the CEF header, i.e. the first field in the record. The default, simple option is just to have the CEF version present.
+    The second option  is to include the full Syslog prefix as part of the header. This is a three part field consisting of an event datetime, the event host, and the CEF version.
+    The three fields in this header are separated by whitespace. Aside from the complex header, all fields in a CEF record are pipe delimited.
+    Aside from the header, there are several other fields in a CEF record. Required fields aside from the header are Device Vendor, Device Product, Device Version, Device Event Class Id,
+    Name, and Severity.
+</p>
+
+<p>
+    In addition to these fields, there is an optional Extension field at the end of the CEF record. This is made up of key/value pairs that correspond to a set of
+    supported fieldnames based on the CEF version currently being used as well as any additional user defined fields that can be defined in the downstream appliance that will be receiving
+    records. Please refer to the appropriate CEF or vendor documentation for a complete list of these fields as well as the datatypes they support. Fields in the Extension section are formatted as "key=value"
+    where key is the fieldname and value is the data value that corresponds to the field.
+</p>
+
+<p>
+    Data values in a CEF record canot have "|", "\", or "=" as characters without them being escaped. This processor has logic to check all field values and escape these characters,
+    but where possible it is a good idea to remove or replace these characters in data preprocessing before conversion, as this will simplify the conversion and make the data more easily human readable.
+</p>
+
+<p>
+    <strong>Tags:</strong>
+</p>
+
+<p>
+    cef, SIEM, modification, update, Attribute Expression Language, Arcsight
+</p>
+
+<p>
+    <strong>Properties:</strong>
+</p>
+
+<p>
+    This processor has several pre-existing properties present. There are two drop downs allowing the end user to select whether to use the simple or complex header and whether the content of the flowfile should be
+    included in the aforementioned Extension field as the value for the "msg" property. There are also required properties that correspond to each of hte required fields in a CEF record as well as two optional properties
+    for Event Date and Event Host. These last two are necessary if "Use Complex Header" is selected, as these are the values for the Syslog fields that are included as part of the header. All of these properties support
+    expression language, allowing for either absolute values to be provided, for example defining the CEF version with "CEF:1", referencing flowfile attributes from the incoming FlowFiles, or even referencing values in
+    the Nifi Variable Registry. This can be especially useful for records that have come in from sources such as ListenSyslog, where some or all of the CEF fields may already have appropriate values present, or where you want
+    all CEF records to have the same value for a particular field, such as, again, the CEF version in the header.
+</p>
+
+<p>
+    Finally, this processor supports adding dynamic properties. These properties correspond to the key/value pairs that will be written into the Extension section of the CEF record. The name of the property is used as the key
+    and the property value is used as the value in the record. Because of this, please ensure that all property names correspond to supported field names as defined by your CEF version. These dynamic properties, much like the static
+    properties already present on the processor, support expression language, so their values can reference items in the Variable Registry, attributes on the incoming FlowFile, or static values entered as a property value. If the option to
+    use FlowFile content as the value of "msg" in the Extension field is enabled, please avoid adding an additional dynamic property for msg, as it WILL cause downstream problems when trying to parse the CEF record.
+</p>
+
+<p>
+    <strong>Relationships:</strong>
+</p>
+<ul>
+    <li>success
+        <ul>
+            <li>If the processor successfully generates a CEF record based on the properties defined, then the FlowFile follows this relationship.</li>
+        </ul>
+    </li>
+    <li>failure
+        <ul>
+            <li>If the processor is unable to create a CEF file based on the configured properties or the content or attributes of the incoming FlowFile, then the FlowFile will be routed to this relationship.</li>
+        </ul>
+    </li>
+</ul>
+
+</body>
+</html>
